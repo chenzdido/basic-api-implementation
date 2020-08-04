@@ -99,4 +99,20 @@ class RsControllerTest {
                 .andExpect(jsonPath("$[1].keyWord",is("无标签")));
 
     }
+
+    @Test
+    public void should_change_rs_event() throws Exception {
+        String js = "{\"eventName\":\"猪肉涨价啦\",\"keyWord\":\"经济\"}";
+        mockMvc.perform(put("/rs/change/3").content(js).contentType(MediaType.APPLICATION_JSON));
+        mockMvc.perform(get("/rs/list"))
+                .andExpect(jsonPath("$",hasSize(3)))
+                .andExpect(jsonPath("$[0].eventName",is("第一条事件")))
+                .andExpect(jsonPath("$[0].keyWord",is("无标签")))
+                .andExpect(jsonPath("$[1].eventName",is("第二条事件")))
+                .andExpect(jsonPath("$[1].keyWord",is("无标签")))
+                .andExpect(jsonPath("$[2].eventName",is("猪肉涨价啦")))
+                .andExpect(jsonPath("$[2].keyWord",is("经济")))
+                .andExpect(status().isOk());
+
+    }
 }
