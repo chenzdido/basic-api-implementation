@@ -37,4 +37,9 @@ public class RsController {
   public void addRsEvent(@RequestBody RsEvent rsEvent){
     rsList.add(rsEvent);
   }
+
+  @DeleteMapping("/rs/delete/{index}")
+  public void deletRsEvent(@PathVariable int index){
+    rsList.remove(index-1);
+  }
 }
