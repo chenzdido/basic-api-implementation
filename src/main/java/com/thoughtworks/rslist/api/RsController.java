@@ -43,7 +43,7 @@ public class RsController {
     rsList.remove(index-1);
   }
 
-  @PutMapping("rs/change/{index}")
+  @PatchMapping("rs/change/{index}")
   public void changeRsEvent(@PathVariable int index, @RequestBody RsEvent rsEvent){
     if(rsEvent.getEventName()!=null){
       rsList.get(index-1).setEventName(rsEvent.getEventName());
