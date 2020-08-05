@@ -1,5 +1,7 @@
 package com.thoughtworks.rslist.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sun.istack.NotNull;
 import org.springframework.validation.annotation.Validated;
 
@@ -33,11 +35,11 @@ public class RsEvent {
     public void setKeyWord(String keyWord) {
         this.keyWord = keyWord;
     }
-
+    @JsonIgnore
     public User getUser() {
         return user;
     }
-
+    @JsonProperty
     public void setUser(User user) {
         this.user = user;
     }

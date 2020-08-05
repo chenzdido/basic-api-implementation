@@ -61,17 +61,17 @@ public class RsController {
   @DeleteMapping("/rs/delete/{index}")
   public ResponseEntity deletRsEvent(@PathVariable int index){
     rsList.remove(index-1);
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(null);
   }
 
   @PatchMapping("rs/change/{index}")
-  public void ResponseEntity(@PathVariable int index, @RequestBody RsEvent rsEvent){
+  public ResponseEntity changeRsEvent(@PathVariable int index, @RequestBody RsEvent rsEvent){
     if(rsEvent.getEventName()!=null){
       rsList.get(index-1).setEventName(rsEvent.getEventName());
     }
     if(rsEvent.getKeyWord()!=null){
       rsList.get(index-1).setKeyWord(rsEvent.getKeyWord());
     }
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(null);
   }
 }
