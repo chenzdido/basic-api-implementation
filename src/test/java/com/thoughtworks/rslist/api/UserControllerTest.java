@@ -95,6 +95,16 @@ class UserControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    public void should_user_suit_format() throws Exception {
+        User user = new User("chenz", "female", 18, "c@z.com", "28824326722");
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonString = objectMapper.writeValueAsString(user);
+        mockMvc.perform(post("/user/event").content(jsonString).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error", is("invalid user")));
+    }
+
 
 
 }
