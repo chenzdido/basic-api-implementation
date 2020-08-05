@@ -43,7 +43,16 @@ public class RsController {
   @PostMapping("/rs/event")
   public void addRsEvent(@RequestBody RsEvent rsEvent){
     String username=rsEvent.getUser().getUserName();
-    userList.add(rsEvent.getUser());
+    Boolean not_exit=true;
+    for(User u: userList){
+      if(u.getUserName()==username){
+        not_exit=false;
+        break;
+      }
+    }
+    if(not_exit){
+      userList.add(rsEvent.getUser());
+    }
     rsList.add(rsEvent);
   }
 

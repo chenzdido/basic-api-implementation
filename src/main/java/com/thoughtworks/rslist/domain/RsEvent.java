@@ -1,8 +1,15 @@
 package com.thoughtworks.rslist.domain;
 
+import com.sun.istack.NotNull;
+import org.springframework.validation.annotation.Validated;
+
+import javax.validation.Valid;
+
 public class RsEvent {
+    //@NotNull(group=a.class)
     private String eventName;
     private String keyWord;
+    @Valid
     private User user;
 
     public RsEvent(String eventName, String keyWord,User user) {
