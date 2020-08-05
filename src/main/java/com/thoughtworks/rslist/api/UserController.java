@@ -1,5 +1,6 @@
 package com.thoughtworks.rslist.api;
 
+import com.thoughtworks.rslist.domain.NewUser;
 import com.thoughtworks.rslist.domain.RsEvent;
 import com.thoughtworks.rslist.domain.User;
 import com.thoughtworks.rslist.domain.UserList;
@@ -13,6 +14,15 @@ import java.util.List;
 public class UserController {
     UserList u=new UserList();
     List<User> userList=u.getUserList();
+    @GetMapping("/users")
+    public List<NewUser> getNewUserList(){
+        List<NewUser> newUserList = new ArrayList();;
+        for(User user:userList){
+            NewUser newUser=new NewUser(user);
+            newUserList.add(newUser);
+        }
+        return newUserList;
+    }
 
     @GetMapping("/user")
     public List<User> getserList() {
