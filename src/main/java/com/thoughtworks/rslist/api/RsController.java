@@ -55,7 +55,7 @@ public class RsController {
       userList.add(rsEvent.getUser());
     }
     rsList.add(rsEvent);
-    return ResponseEntity.created(null).build();
+    return ResponseEntity.created(null).header("添加的热搜事件在列表中的位置",rsList.indexOf(rsEvent)+"").build();
   }
 
   @DeleteMapping("/rs/delete/{index}")
