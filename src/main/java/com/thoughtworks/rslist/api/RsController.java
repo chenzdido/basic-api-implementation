@@ -41,6 +41,9 @@ public class RsController {
 
   @GetMapping("/rs/list")
   public ResponseEntity getRsEventBetween(@RequestParam(required=false) Integer start, @RequestParam(required=false) Integer end) {
+    if(start<1||end>rsList.size()){
+      throw new RsEventNotValueException("invalid request param");
+    }
     if (start!=null&&end!=null) {
       return ResponseEntity.ok(rsList.subList(start - 1, end));
     }
@@ -81,17 +84,6 @@ public class RsController {
     }
     return ResponseEntity.ok(null);
   }
-  @ExceptionHandler({RsEventNotValueException.class, MethodArgumentNotValidException.class})
-  public ResponseEntity RsEventExceptionHandler(Exception e){
-    String errorMessage;
-    if(e instanceof MethodArgumentNotValidException){
-      errorMessage="invalid param";
-    }else{
-      errorMessage=e.getMessage();
-    }
-    Error error=new Error();
-    error.setError(errorMessage);
-    return ResponseEntity.badRequest().body(error);
-  }
+
 
 }
