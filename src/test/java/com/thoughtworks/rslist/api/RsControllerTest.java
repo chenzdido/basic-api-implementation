@@ -198,4 +198,18 @@ class RsControllerTest {
                 .andExpect(status().isOk());
 
     }
+    @Test
+    public void should_throw_index_exception() throws Exception {
+        mockMvc.perform(get("/rs/0"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error", is("invalid index")));
+    }
+
+    @Test
+    public void should_throw_method_not_valid_exception() throws Exception{
+        String jsonString="{\"eventName\":\"猪肉涨价了\",\"keyWord\":\"经济\",\"user\": {\"userName\":\"chenzxxxxxx\",\"age\": 19,\"gender\": \"female\",\"email\": \"a@b.com\",\"phone\": \"18888888888\"}}";
+        mockMvc.perform(post("/rs/event").content(jsonString).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error",is("invalid param")));
+    }
 }

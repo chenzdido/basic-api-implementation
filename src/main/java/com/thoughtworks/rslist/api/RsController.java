@@ -3,9 +3,13 @@ package com.thoughtworks.rslist.api;
 import com.thoughtworks.rslist.domain.RsEvent;
 import com.thoughtworks.rslist.domain.User;
 import com.thoughtworks.rslist.domain.UserList;
+import com.thoughtworks.rslist.exception.Error;
+import com.thoughtworks.rslist.exception.RsEventNotValueException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +33,9 @@ public class RsController {
 
   @GetMapping("/rs/{index}")
   public ResponseEntity getRsEvent(@PathVariable int index){
+    if(index<1||index>rsList.size()){
+      throw new RsEventNotValueException("invalid index");
+    }
     return ResponseEntity.ok(rsList.get(index-1));
   }
 
@@ -42,7 +49,7 @@ public class RsController {
   }
 
   @PostMapping("/rs/event")
-  public ResponseEntity addRsEvent(@RequestBody RsEvent rsEvent){
+  public ResponseEntity addRsEvent(@RequestBody @Valid RsEvent rsEvent){
     String username=rsEvent.getUser().getUserName();
     Boolean not_exit=true;
     for(User u: userList){
@@ -74,4 +81,17 @@ public class RsController {
     }
     return ResponseEntity.ok(null);
   }
+  @ExceptionHandler({RsEventNotValueException.class, MethodArgumentNotValidException.class})
+  public ResponseEntity RsEventExceptionHandler(Exception e){
+    String errorMessage;
+    if(e instanceof MethodArgumentNotValidException){
+      errorMessage="invalid param";
+    }else{
+      errorMessage=e.getMessage();
+    }
+    Error error=new Error();
+    error.setError(errorMessage);
+    return ResponseEntity.badRequest().body(error);
+  }
+
 }
