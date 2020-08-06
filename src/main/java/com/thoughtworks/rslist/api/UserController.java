@@ -34,21 +34,34 @@ public class UserController {
     }
 
     @GetMapping("/user")
-    public List<User> getserList() {
-        return users;
+    public List<UserDto> getserList() {
+        List<UserDto> all=userRepository.findAll();
+        return all;
 
     }
-    @GetMapping("/user/{index}")
-    public ResponseEntity getUser(@PathVariable int index){
-        List<UserDto> all=userRepository.findAll();
-        return ResponseEntity.ok(all.get(index-1));
-    }
+
     /*@PostMapping("/user/event")
     public ResponseEntity registerUser(@RequestBody @Valid User user){
 
         users.add(user);
         return ResponseEntity.created(null).build();
     }*/
+
+
+    @ExceptionHandler( MethodArgumentNotValidException.class)
+    public ResponseEntity RsEventExceptionHandler(Exception e){
+        String errorMessage="invalid user";
+        Error error=new Error();
+        error.setError(errorMessage);
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @GetMapping("/user/{index}")
+    public ResponseEntity getUser(@PathVariable int index){
+        List<UserDto> all=userRepository.findAll();
+        return ResponseEntity.ok(all.get(index-1));
+    }
+
     @PostMapping("/user/event")
     public ResponseEntity register(@RequestBody @Valid User user){
         UserDto userDto=new UserDto();
@@ -62,11 +75,9 @@ public class UserController {
         return ResponseEntity.created(null).header("userId",userDto.getId()+"").build();
     }
 
-    @ExceptionHandler( MethodArgumentNotValidException.class)
-    public ResponseEntity RsEventExceptionHandler(Exception e){
-        String errorMessage="invalid user";
-        Error error=new Error();
-        error.setError(errorMessage);
-        return ResponseEntity.badRequest().body(error);
+    @DeleteMapping("/user/delete/{index}")
+    public ResponseEntity deletUserEvent(@PathVariable int index){
+        userRepository.deleteById(index);
+        return ResponseEntity.ok(null);
     }
 }

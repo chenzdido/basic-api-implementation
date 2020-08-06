@@ -18,8 +18,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -51,7 +50,7 @@ class UserControllerTest {
     }
 
     @Test
-    public void should_get_rs_event() throws Exception {
+    public void should_get_user_by_id() throws Exception {
         User user = new User("cz", "female", 18, "cc@z.com", "18824526722");
         String jsonString = objectMapper.writeValueAsString(user);
         String id=mockMvc.perform(post("/user/event").content(jsonString).contentType(MediaType.APPLICATION_JSON))
@@ -64,9 +63,26 @@ class UserControllerTest {
                 .andExpect(status().isOk());
 
     }
+    @Test
+    public void should_delete_user_by_id() throws Exception {
+        User user = new User("cz", "female", 18, "cc@z.com", "18824526722");
+        String jsonString = objectMapper.writeValueAsString(user);
+        String id=mockMvc.perform(post("/user/event").content(jsonString).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getHeader("userId");
+        mockMvc.perform(delete("/user/delete/"+id))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/user"))
+                .andExpect(jsonPath("$",hasSize(0)))
+                .andExpect(status().isOk());
+
+
+    }
 
     @Test
-    public void should_get_newuser_list() throws Exception{
+    public void should_get_new_user_list() throws Exception{
         mockMvc.perform(get("/users"))
                 .andExpect(jsonPath("$",hasSize(2)))
                 .andExpect(jsonPath("$[0].user_Name",is("cz")))

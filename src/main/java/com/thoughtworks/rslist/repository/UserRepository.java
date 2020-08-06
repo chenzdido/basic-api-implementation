@@ -7,7 +7,10 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<UserDto,Integer> {
+public interface UserRepository extends CrudRepository<UserDto,Integer> {
     @Override
     List<UserDto> findAll();
+
+    @Override
+    void deleteById(Integer integer);
 }
