@@ -38,7 +38,11 @@ public class UserController {
         return users;
 
     }
-
+    @GetMapping("/user/{index}")
+    public ResponseEntity getUser(@PathVariable int index){
+        List<UserDto> all=userRepository.findAll();
+        return ResponseEntity.ok(all.get(index-1));
+    }
     /*@PostMapping("/user/event")
     public ResponseEntity registerUser(@RequestBody @Valid User user){
 
@@ -46,7 +50,7 @@ public class UserController {
         return ResponseEntity.created(null).build();
     }*/
     @PostMapping("/user/event")
-    public void register(@RequestBody @Valid User user){
+    public ResponseEntity register(@RequestBody @Valid User user){
         UserDto userDto=new UserDto();
         userDto.setPhone(user.getPhone());
         userDto.setVoteNum(user.getVoteNum());
@@ -55,6 +59,7 @@ public class UserController {
         userDto.setGender(user.getGender());
         userDto.setUserName(user.getUserName());
         userRepository.save(userDto);
+        return ResponseEntity.created(null).header("userId",userDto.getId()+"").build();
     }
 
     @ExceptionHandler( MethodArgumentNotValidException.class)

@@ -11,7 +11,6 @@ public class UserDto {
     @Id
     @GeneratedValue
     private int id;
-    @Column(name="name")
     private String userName;
     private String gender;
     private int age;

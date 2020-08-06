@@ -42,11 +42,26 @@ class UserControllerTest {
         User user = new User("chenz", "female", 18, "c@z.com", "18824326722");
         String jsonString = objectMapper.writeValueAsString(user);
         mockMvc.perform(post("/user/event").content(jsonString).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
         List<UserDto> all=userRepository.findAll();
         assertEquals(1,all.size());
         assertEquals("chenz",all.get(0).getUserName());
         assertEquals("c@z.com",all.get(0).getEmail());
+
+    }
+
+    @Test
+    public void should_get_rs_event() throws Exception {
+        User user = new User("cz", "female", 18, "cc@z.com", "18824526722");
+        String jsonString = objectMapper.writeValueAsString(user);
+        String id=mockMvc.perform(post("/user/event").content(jsonString).contentType(MediaType.APPLICATION_JSON))
+                         .andExpect(status().isCreated())
+                         .andReturn()
+                         .getResponse()
+                         .getHeader("userId");
+        mockMvc.perform(get("/user/"+id))
+                .andExpect(jsonPath("$.userName",is("cz")))
+                .andExpect(status().isOk());
 
     }
 
