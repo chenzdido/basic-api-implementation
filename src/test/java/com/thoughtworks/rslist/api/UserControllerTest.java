@@ -1,13 +1,19 @@
 package com.thoughtworks.rslist.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.rslist.domain.User;
+import com.thoughtworks.rslist.dto.UserDto;
+import com.thoughtworks.rslist.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -22,6 +28,27 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserControllerTest {
     @Autowired
     MockMvc mockMvc;
+    ObjectMapper objectMapper;
+    @Autowired
+    UserRepository userRepository;
+
+    @BeforeEach
+    void setUp(){
+        objectMapper=new ObjectMapper();
+    }
+
+    @Test
+    public void should_register_user_test() throws Exception {
+        User user = new User("chenz", "female", 18, "c@z.com", "18824326722");
+        String jsonString = objectMapper.writeValueAsString(user);
+        mockMvc.perform(post("/user/event").content(jsonString).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        List<UserDto> all=userRepository.findAll();
+        assertEquals(1,all.size());
+        assertEquals("chenz",all.get(0).getUserName());
+        assertEquals("c@z.com",all.get(0).getEmail());
+
+    }
 
     @Test
     public void should_get_newuser_list() throws Exception{
@@ -104,6 +131,8 @@ class UserControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error", is("invalid user")));
     }
+
+
 
 
 
