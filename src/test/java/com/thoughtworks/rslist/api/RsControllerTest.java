@@ -3,6 +3,10 @@ package com.thoughtworks.rslist.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.rslist.domain.RsEvent;
 import com.thoughtworks.rslist.domain.User;
+import com.thoughtworks.rslist.dto.RsEventDto;
+import com.thoughtworks.rslist.dto.UserDto;
+import com.thoughtworks.rslist.repository.RsEventRepositpry;
+import com.thoughtworks.rslist.repository.UserRepository;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -12,6 +16,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.hasKey;
@@ -26,6 +32,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class RsControllerTest {
     @Autowired
     MockMvc mockMvc;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private RsEventRepositpry rsEventRepositpry;
 
 
     @Order(1)
@@ -84,11 +94,21 @@ class RsControllerTest {
     @Order(4)
     @Test
     public void should_add_rs_event_user_exit() throws Exception {
-        User user = new User("chenz", "female", 18, "cc@z.com", "18324326722");
-        RsEvent rsEvent=new RsEvent("猪肉涨价了","经济",user);
-        String jsonString=new ObjectMapper().writeValueAsString(rsEvent);
+        UserDto save=userRepository.save(UserDto.builder().email("c@zz.com").phone("18888888999").gender("female")
+                       .age(19).userName("cc").voteNum(10).build());
+        //RsEventDto rsEventdto=new RsEventDto("猪肉涨价了","经济",save.getId());
+        RsEventDto rsEventDto=RsEventDto.builder().keyword("猪肉涨价了").eventName("经济").userId(save.getId()).build();
+        String jsonString=new ObjectMapper().writeValueAsString(rsEventDto);
         mockMvc.perform(post("/rs/event").content(jsonString).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
+        List<RsEventDto> all= rsEventRepositpry.findAll();
+        assertNotNull(all);
+        assertEquals(1,all.size());
+        assertEquals("猪肉涨价了",all.get(0).getEventName());
+        assertEquals("经济",all.get(0).getKeyword());
+        assertEquals(save.getId(),all.get(0).getUserId());
+
+
         mockMvc.perform(get("/rs/list"))
                 .andExpect(jsonPath("$",hasSize(4)))
                 .andExpect(jsonPath("$[0].eventName",is("第一条事件")))
@@ -117,7 +137,7 @@ class RsControllerTest {
     @Test
     public void should_add_rs_event_user_not_exit() throws Exception {
         User user = new User("chz", "female", 18, "ck@z.com", "18894326722");
-        RsEvent rsEvent=new RsEvent("猪肉涨价了","经济",user);
+        RsEvent rsEvent=new RsEvent("猪肉涨价了","经济",1);
         String jsonString=new ObjectMapper().writeValueAsString(rsEvent);
         mockMvc.perform(post("/rs/event").content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -165,7 +185,7 @@ class RsControllerTest {
     @Test
     public void should_change_rs_event() throws Exception {
         User user = new User("chenz", "female", 18, "c@z.com", "18824326722");
-        RsEvent rsEvent=new RsEvent("猪肉涨价了","经济",user);
+        RsEvent rsEvent=new RsEvent("猪肉涨价了","经济",1);
         String jsonString=new ObjectMapper().writeValueAsString(rsEvent);
         mockMvc.perform(patch("/rs/change/3").content(jsonString).contentType(MediaType.APPLICATION_JSON));
         mockMvc.perform(get("/rs/list"))
@@ -184,7 +204,7 @@ class RsControllerTest {
     @Test
     public void should_change_one_rs_event() throws Exception {
         User user = new User("chenz", "female", 18, "c@z.com", "18824326722");
-        RsEvent rsEvent=new RsEvent("猪肉涨价了",null,user);
+        RsEvent rsEvent=new RsEvent("猪肉涨价了",null,1);
         String jsonString=new ObjectMapper().writeValueAsString(rsEvent);
         mockMvc.perform(patch("/rs/change/3").content(jsonString).contentType(MediaType.APPLICATION_JSON));
         mockMvc.perform(get("/rs/list"))

@@ -3,8 +3,11 @@ package com.thoughtworks.rslist.api;
 import com.thoughtworks.rslist.domain.RsEvent;
 import com.thoughtworks.rslist.domain.User;
 import com.thoughtworks.rslist.domain.UserList;
+import com.thoughtworks.rslist.dto.RsEventDto;
 import com.thoughtworks.rslist.exception.Error;
 import com.thoughtworks.rslist.exception.RsEventNotValueException;
+import com.thoughtworks.rslist.repository.RsEventRepositpry;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +19,9 @@ import java.util.List;
 
 @RestController
 public class RsController {
+  @Autowired
+  RsEventRepositpry rsEventRepositpry;
+
   UserList u=new UserList();
   List<User> userList=u.getUserList();
   private List<RsEvent> rsList = initRsEventList();
@@ -23,9 +29,9 @@ public class RsController {
     List<RsEvent> rsEventList = new ArrayList<>();
     User user=new User("chenz", "female", 18, "c@z.com", "18824326722");
     userList.add(user);
-    rsEventList.add(new RsEvent("第一条事件","无标签",user));
-    rsEventList.add(new RsEvent("第二条事件","无标签",user));
-    rsEventList.add(new RsEvent("第三条事件","无标签",user));
+    rsEventList.add(new RsEvent("第一条事件","无标签",1));
+    rsEventList.add(new RsEvent("第二条事件","无标签",1));
+    rsEventList.add(new RsEvent("第三条事件","无标签",1));
     return rsEventList;
   }
 
@@ -53,19 +59,10 @@ public class RsController {
 
   @PostMapping("/rs/event")
   public ResponseEntity addRsEvent(@RequestBody @Valid RsEvent rsEvent){
-    String username=rsEvent.getUser().getUserName();
-    Boolean not_exit=true;
-    for(User u: userList){
-      if(u.getUserName()==username){
-        not_exit=false;
-        break;
-      }
-    }
-    if(not_exit){
-      userList.add(rsEvent.getUser());
-    }
-    rsList.add(rsEvent);
-    return ResponseEntity.created(null).header("添加的热搜事件在列表中的位置",rsList.indexOf(rsEvent)+"").build();
+    RsEventDto rsEventDto=RsEventDto.builder().keyword(rsEvent.getKeyWord()).eventName(rsEvent.getEventName()).userId(rsEvent.getUserId()).build();
+    rsEventRepositpry.save(rsEventDto);
+    return ResponseEntity.created(null).build();
+
   }
 
   @DeleteMapping("/rs/delete/{index}")

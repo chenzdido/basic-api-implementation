@@ -12,12 +12,12 @@ public class RsEvent {
     private String eventName;
     private String keyWord;
     @Valid
-    private User user;
+    private int userId;
 
-    public RsEvent(String eventName, String keyWord,User user) {
+    public RsEvent(String eventName, String keyWord,int userId) {
         this.eventName=eventName;
         this.keyWord=keyWord;
-        this.user=user;
+        this.userId=userId;
     }
 
     public String getEventName() {
@@ -36,11 +36,11 @@ public class RsEvent {
         this.keyWord = keyWord;
     }
     @JsonIgnore
-    public User getUser() {
-        return user;
+    public int getUserId() {
+        return userId;
     }
     @JsonProperty
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 }
