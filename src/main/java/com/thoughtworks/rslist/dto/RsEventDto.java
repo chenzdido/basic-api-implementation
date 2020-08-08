@@ -19,7 +19,7 @@ public class RsEventDto {
     @GeneratedValue
     private int id;
     private String eventName;
-    private String keyword;
+    private String keyWord;
     private int userId;
 
 

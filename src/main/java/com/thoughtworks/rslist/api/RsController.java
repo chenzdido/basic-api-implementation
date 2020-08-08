@@ -7,6 +7,7 @@ import com.thoughtworks.rslist.dto.RsEventDto;
 import com.thoughtworks.rslist.exception.Error;
 import com.thoughtworks.rslist.exception.RsEventNotValueException;
 import com.thoughtworks.rslist.repository.RsEventRepositpry;
+import com.thoughtworks.rslist.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -21,6 +22,8 @@ import java.util.List;
 public class RsController {
   @Autowired
   RsEventRepositpry rsEventRepositpry;
+  @Autowired
+  UserRepository userRepository;
 
   UserList u=new UserList();
   List<User> userList=u.getUserList();
@@ -59,7 +62,10 @@ public class RsController {
 
   @PostMapping("/rs/event")
   public ResponseEntity addRsEvent(@RequestBody @Valid RsEvent rsEvent){
-    RsEventDto rsEventDto=RsEventDto.builder().keyword(rsEvent.getKeyWord()).eventName(rsEvent.getEventName()).userId(rsEvent.getUserId()).build();
+    if(!userRepository.findById(rsEvent.getUserId()).isPresent()){
+      return ResponseEntity.badRequest().build();
+    }
+    RsEventDto rsEventDto=RsEventDto.builder().keyWord(rsEvent.getKeyWord()).eventName(rsEvent.getEventName()).userId(rsEvent.getUserId()).build();
     rsEventRepositpry.save(rsEventDto);
     return ResponseEntity.created(null).build();
 

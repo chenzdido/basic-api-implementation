@@ -91,23 +91,6 @@ class UserControllerTest {
 
     }
 
-    /*@Test
-    public void should_get_new_user_list() throws Exception{
-        mockMvc.perform(get("/users"))
-                .andExpect(jsonPath("$",hasSize(2)))
-                .andExpect(jsonPath("$[0].user_Name",is("cz")))
-                .andExpect(jsonPath("$[0].user_gender",is("female")))
-                .andExpect(jsonPath("$[0].user_age",is(18)))
-                .andExpect(jsonPath("$[0].user_email",is("cc@z.com")))
-                .andExpect(jsonPath("$[0].user_phone",is("18324326722")))
-                .andExpect(jsonPath("$[1].user_Name",is("chenz")))
-                .andExpect(jsonPath("$[1].user_gender",is("female")))
-                .andExpect(jsonPath("$[1].user_age",is(18)))
-                .andExpect(jsonPath("$[1].user_email",is("c@z.com")))
-                .andExpect(jsonPath("$[1].user_phone",is("18824326722")))
-                .andExpect(status().isOk());
-    }*/
-
     @Test
     public void should_user_name_less_than_8() throws Exception {
         User user=new User("chenzddddddd", "female", 18, "c@z.com", "18824326722");
