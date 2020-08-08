@@ -3,7 +3,9 @@ package com.thoughtworks.rslist.api;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.rslist.domain.User;
+import com.thoughtworks.rslist.dto.RsEventDto;
 import com.thoughtworks.rslist.dto.UserDto;
+import com.thoughtworks.rslist.repository.RsEventRepositpry;
 import com.thoughtworks.rslist.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,10 +32,14 @@ class UserControllerTest {
     ObjectMapper objectMapper;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    RsEventRepositpry rsEventRepositpry;
 
     @BeforeEach
     void setUp(){
         objectMapper=new ObjectMapper();
+        rsEventRepositpry.deleteAll();
+        userRepository.deleteAll();
         UserDto userDto=UserDto.builder().userName("dido").age(19).email("dido@t.com").gender("female").phone("18079773289").voteNum(10).build();
         userRepository.save(userDto);
     }
@@ -87,6 +93,20 @@ class UserControllerTest {
         mockMvc.perform(get("/user"))
                 .andExpect(jsonPath("$",hasSize(1)))
                 .andExpect(status().isOk());
+
+
+    }
+
+    @Test
+    public void should_delete_user_by_id_and_delete_rsEvent() throws Exception {
+        UserDto save=userRepository.save(UserDto.builder().email("c@zz.com").phone("18888888999").gender("female")
+                .age(19).userName("cc").build());
+        RsEventDto rsEventDto=RsEventDto.builder().eventName("猪肉涨价了").keyWord("经济").userDto(save).build();
+        rsEventRepositpry.save(rsEventDto);
+        mockMvc.perform(delete("/user/delete/{id}",save.getId()))
+                .andExpect(status().isOk());
+        assertEquals(1,userRepository.findAll().size());
+        assertEquals(0,rsEventRepositpry.findAll().size());
 
 
     }

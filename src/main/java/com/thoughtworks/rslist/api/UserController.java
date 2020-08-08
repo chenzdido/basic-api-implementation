@@ -7,12 +7,14 @@ import com.thoughtworks.rslist.domain.UserList;
 import com.thoughtworks.rslist.dto.UserDto;
 import com.thoughtworks.rslist.exception.Error;
 import com.thoughtworks.rslist.exception.RsEventNotValueException;
+import com.thoughtworks.rslist.repository.RsEventRepositpry;
 import com.thoughtworks.rslist.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +23,8 @@ import java.util.List;
 public class UserController {
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    RsEventRepositpry rsEventRepositpry;
 
 
 
@@ -50,10 +54,11 @@ public class UserController {
         return ResponseEntity.created(null).header("userId",userDto.getId()+"").build();
     }
 
-    @DeleteMapping("/user/delete/{index}")
-    public ResponseEntity deletUserEvent(@PathVariable int index){
-        userRepository.deleteById(index);
-        return ResponseEntity.ok(null);
+    @DeleteMapping("/user/delete/{id}")
+    @Transactional
+    public ResponseEntity deleteUserEvent(@PathVariable int id){
+        userRepository.deleteById(id);
+        return ResponseEntity.ok().build();
     }
 
     @ExceptionHandler( MethodArgumentNotValidException.class)

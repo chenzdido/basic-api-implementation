@@ -4,6 +4,7 @@ import com.thoughtworks.rslist.domain.RsEvent;
 import com.thoughtworks.rslist.domain.User;
 import com.thoughtworks.rslist.domain.UserList;
 import com.thoughtworks.rslist.dto.RsEventDto;
+import com.thoughtworks.rslist.dto.UserDto;
 import com.thoughtworks.rslist.exception.Error;
 import com.thoughtworks.rslist.exception.RsEventNotValueException;
 import com.thoughtworks.rslist.repository.RsEventRepositpry;
@@ -17,6 +18,7 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class RsController {
@@ -62,10 +64,12 @@ public class RsController {
 
   @PostMapping("/rs/event")
   public ResponseEntity addRsEvent(@RequestBody @Valid RsEvent rsEvent){
-    if(!userRepository.findById(rsEvent.getUserId()).isPresent()){
+    Optional<UserDto> userDto=userRepository.findById(rsEvent.getUserId());
+    if(!userDto.isPresent()){
       return ResponseEntity.badRequest().build();
     }
-    RsEventDto rsEventDto=RsEventDto.builder().keyWord(rsEvent.getKeyWord()).eventName(rsEvent.getEventName()).userId(rsEvent.getUserId()).build();
+    RsEventDto rsEventDto=RsEventDto.builder().keyWord(rsEvent.getKeyWord()).eventName(rsEvent.getEventName())
+            .userDto(userDto.get()).build();
     rsEventRepositpry.save(rsEventDto);
     return ResponseEntity.created(null).build();
 

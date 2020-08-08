@@ -7,10 +7,7 @@ import com.thoughtworks.rslist.dto.RsEventDto;
 import com.thoughtworks.rslist.dto.UserDto;
 import com.thoughtworks.rslist.repository.RsEventRepositpry;
 import com.thoughtworks.rslist.repository.UserRepository;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,9 +30,18 @@ class RsControllerTest {
     @Autowired
     MockMvc mockMvc;
     @Autowired
-    private UserRepository userRepository;
+    UserRepository userRepository;
     @Autowired
-    private RsEventRepositpry rsEventRepositpry;
+    RsEventRepositpry rsEventRepositpry;
+    UserDto userDto;
+
+    @BeforeEach
+    void setUp(){
+        rsEventRepositpry.deleteAll();
+        userRepository.deleteAll();
+        userDto=userRepository.save(UserDto.builder().email("c@zz.com").phone("18888888999").gender("female")
+                .age(19).userName("cc").build());
+    }
 
 
     @Order(1)
@@ -94,10 +100,8 @@ class RsControllerTest {
     @Order(4)
     @Test
     public void should_add_rs_event_user_exit() throws Exception {
-        UserDto save=userRepository.save(UserDto.builder().email("c@zz.com").phone("18888888999").gender("female")
-                       .age(19).userName("cc").build());
-        RsEventDto rsEventDto=RsEventDto.builder().eventName("猪肉涨价了").userId(save.getId()).keyWord("经济").build();
-        String jsonString=new ObjectMapper().writeValueAsString(rsEventDto);
+        RsEvent rsEvent=new RsEvent("猪肉涨价了","经济",1);
+        String jsonString=new ObjectMapper().writeValueAsString(rsEvent);
         mockMvc.perform(post("/rs/event").content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
         List<RsEventDto> all= rsEventRepositpry.findAll();
@@ -105,12 +109,14 @@ class RsControllerTest {
         assertEquals(1,all.size());
         assertEquals("猪肉涨价了",all.get(0).getEventName());
         assertEquals("经济",all.get(0).getKeyWord());
-        assertEquals(save.getId(),all.get(0).getUserId());
+        assertEquals(userDto.getId(),all.get(0).getUserDto().getId());
     }
 
     @Test
     public void should_not_add_rs_event_user_not_exit() throws Exception {
-        RsEventDto rsEventDto=RsEventDto.builder().eventName("猪肉涨价了").userId(100).keyWord("经济").build();
+        UserDto newUser=UserDto.builder().email("c@zzl.com").phone("18888887999").gender("female")
+                .age(19).userName("zz").build();
+        RsEventDto rsEventDto=RsEventDto.builder().eventName("猪肉涨价了").userDto(newUser).keyWord("经济").build();
         String jsonString=new ObjectMapper().writeValueAsString(rsEventDto);
         mockMvc.perform(post("/rs/event").content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());

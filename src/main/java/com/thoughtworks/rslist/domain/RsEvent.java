@@ -35,11 +35,11 @@ public class RsEvent {
     public void setKeyWord(String keyWord) {
         this.keyWord = keyWord;
     }
-    @JsonIgnore
+    //@JsonIgnore
     public int getUserId() {
         return userId;
     }
-    @JsonProperty
+    //@JsonProperty
     public void setUserId(int userId) {
         this.userId = userId;
     }
