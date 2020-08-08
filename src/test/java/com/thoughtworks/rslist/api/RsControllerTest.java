@@ -132,20 +132,17 @@ class RsControllerTest {
 
     }
 
-    /*@Test
+    @Test
     public void should_change_rs_event() throws Exception {
-        User user = new User("chenz", "female", 18, "c@z.com", "18824326722");
         RsEvent rsEvent=new RsEvent("猪肉涨价了","经济",1);
         String jsonString=new ObjectMapper().writeValueAsString(rsEvent);
-        mockMvc.perform(patch("/rs/change/3").content(jsonString).contentType(MediaType.APPLICATION_JSON));
+        mockMvc.perform(patch("/rs/change/1").content(jsonString).contentType(MediaType.APPLICATION_JSON));
         mockMvc.perform(get("/rs/list"))
-                .andExpect(jsonPath("$",hasSize(3)))
-                .andExpect(jsonPath("$[0].eventName",is("第一条事件")))
-                .andExpect(jsonPath("$[0].keyWord",is("无标签")))
+                .andExpect(jsonPath("$",hasSize(2)))
+                .andExpect(jsonPath("$[0].eventName",is("猪肉涨价了")))
+                .andExpect(jsonPath("$[0].keyWord",is("经济")))
                 .andExpect(jsonPath("$[1].eventName",is("第二条事件")))
                 .andExpect(jsonPath("$[1].keyWord",is("无标签")))
-                .andExpect(jsonPath("$[2].eventName",is("猪肉涨价了")))
-                .andExpect(jsonPath("$[2].keyWord",is("经济")))
                 .andExpect(status().isOk());
 
     }
@@ -154,7 +151,8 @@ class RsControllerTest {
     public void should_change_one_rs_event() throws Exception {
         RsEvent rsEvent=new RsEvent("猪肉涨价了",null,1);
         String jsonString=new ObjectMapper().writeValueAsString(rsEvent);
-        mockMvc.perform(patch("/rs/change/2").content(jsonString).contentType(MediaType.APPLICATION_JSON));
+        mockMvc.perform(patch("/rs/change/2").content(jsonString).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
         mockMvc.perform(get("/rs/list"))
                 .andExpect(jsonPath("$",hasSize(2)))
                 .andExpect(jsonPath("$[0].eventName",is("第一条事件")))
@@ -163,7 +161,7 @@ class RsControllerTest {
                 .andExpect(jsonPath("$[1].keyWord",is("无标签")))
                 .andExpect(status().isOk());
 
-    }*/
+    }
     /*@Test
     public void should_throw_index_exception() throws Exception {
         mockMvc.perform(get("/rs/0"))

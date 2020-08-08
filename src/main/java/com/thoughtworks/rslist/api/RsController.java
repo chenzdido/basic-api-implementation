@@ -9,6 +9,7 @@ import com.thoughtworks.rslist.exception.Error;
 import com.thoughtworks.rslist.exception.RsEventNotValueException;
 import com.thoughtworks.rslist.repository.RsEventRepositpry;
 import com.thoughtworks.rslist.repository.UserRepository;
+import org.hibernate.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -70,5 +71,20 @@ public class RsController {
     return ResponseEntity.ok().build();
   }
 
+  @PatchMapping("/rs/change/{index}")
+  public ResponseEntity changeRsEvent(@PathVariable int index, @RequestBody RsEvent rsEvent){
+    RsEventDto newrsEventDto=rsEventRepositpry.findById(index).get();
+    if(rsEvent.getUserId()!=newrsEventDto.getUserDto().getId()){
+      return ResponseEntity.badRequest().build();
+    }
+    if(rsEvent.getEventName()!=null){
+      newrsEventDto.setEventName(rsEvent.getEventName());
+    }
+    if(rsEvent.getKeyWord()!=null){
+      newrsEventDto.setKeyWord(rsEvent.getKeyWord());
+    }
+    rsEventRepositpry.save(newrsEventDto);
+    return ResponseEntity.ok(null);
+  }
 
 }
