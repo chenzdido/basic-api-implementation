@@ -13,4 +13,7 @@ public interface UserRepository extends CrudRepository<UserDto,Integer> {
 
     @Override
     void deleteById(Integer integer);
+
+    @Override
+    Optional<UserDto> findById(Integer integer);
 }

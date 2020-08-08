@@ -34,6 +34,16 @@ class UserControllerTest {
     @BeforeEach
     void setUp(){
         objectMapper=new ObjectMapper();
+        UserDto userDto=UserDto.builder().userName("dido").age(19).email("dido@t.com").gender("female").phone("18079773289").voteNum(10).build();
+        userRepository.save(userDto);
+    }
+
+    @Test
+    public void should_get_user_list() throws Exception {
+        mockMvc.perform(get("/user"))
+                .andExpect(jsonPath("$",hasSize(1)))
+                .andExpect(jsonPath("$[0].userName",is("dido")))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -43,9 +53,9 @@ class UserControllerTest {
         mockMvc.perform(post("/user/event").content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
         List<UserDto> all=userRepository.findAll();
-        assertEquals(1,all.size());
-        assertEquals("chenz",all.get(0).getUserName());
-        assertEquals("c@z.com",all.get(0).getEmail());
+        assertEquals(2,all.size());
+        assertEquals("chenz",all.get(1).getUserName());
+        assertEquals("c@z.com",all.get(1).getEmail());
 
     }
 
@@ -75,13 +85,13 @@ class UserControllerTest {
         mockMvc.perform(delete("/user/delete/"+id))
                 .andExpect(status().isOk());
         mockMvc.perform(get("/user"))
-                .andExpect(jsonPath("$",hasSize(0)))
+                .andExpect(jsonPath("$",hasSize(1)))
                 .andExpect(status().isOk());
 
 
     }
 
-    @Test
+    /*@Test
     public void should_get_new_user_list() throws Exception{
         mockMvc.perform(get("/users"))
                 .andExpect(jsonPath("$",hasSize(2)))
@@ -96,25 +106,8 @@ class UserControllerTest {
                 .andExpect(jsonPath("$[1].user_email",is("c@z.com")))
                 .andExpect(jsonPath("$[1].user_phone",is("18824326722")))
                 .andExpect(status().isOk());
-    }
+    }*/
 
-    @Test
-    public void should_get_user_list() throws Exception {
-        mockMvc.perform(get("/user"))
-                .andExpect(jsonPath("$",hasSize(2)))
-                .andExpect(jsonPath("$[0].userName",is("cz")))
-                .andExpect(jsonPath("$[1].userName",is("chenz")))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    public void should_register_user() throws Exception {
-        User user = new User("chenz", "female", 18, "c@z.com", "18824326722");
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonString = objectMapper.writeValueAsString(user);
-        mockMvc.perform(post("/user/event").content(jsonString).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-    }
     @Test
     public void should_user_name_less_than_8() throws Exception {
         User user=new User("chenzddddddd", "female", 18, "c@z.com", "18824326722");

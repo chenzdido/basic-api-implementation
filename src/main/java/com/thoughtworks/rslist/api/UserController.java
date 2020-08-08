@@ -19,47 +19,22 @@ import java.util.List;
 
 @RestController
 public class UserController {
-    public static List<User> users=new ArrayList<>();
     @Autowired
     UserRepository userRepository;
 
-    @GetMapping("/users")
-    public List<NewUser> getNewUserList(){
-        List<NewUser> newUserList = new ArrayList();;
-        for(User user:users){
-            NewUser newUser=new NewUser(user);
-            newUserList.add(newUser);
-        }
-        return newUserList;
-    }
+
 
     @GetMapping("/user")
-    public List<UserDto> getserList() {
+    public List<UserDto> getUserList() {
         List<UserDto> all=userRepository.findAll();
         return all;
-
     }
 
-    /*@PostMapping("/user/event")
-    public ResponseEntity registerUser(@RequestBody @Valid User user){
-
-        users.add(user);
-        return ResponseEntity.created(null).build();
-    }*/
-
-
-    @ExceptionHandler( MethodArgumentNotValidException.class)
-    public ResponseEntity RsEventExceptionHandler(Exception e){
-        String errorMessage="invalid user";
-        Error error=new Error();
-        error.setError(errorMessage);
-        return ResponseEntity.badRequest().body(error);
-    }
 
     @GetMapping("/user/{index}")
     public ResponseEntity getUser(@PathVariable int index){
-        List<UserDto> all=userRepository.findAll();
-        return ResponseEntity.ok(all.get(index-1));
+        UserDto user=userRepository.findById(index).get();
+        return ResponseEntity.ok(user);
     }
 
     @PostMapping("/user/event")
@@ -79,5 +54,13 @@ public class UserController {
     public ResponseEntity deletUserEvent(@PathVariable int index){
         userRepository.deleteById(index);
         return ResponseEntity.ok(null);
+    }
+
+    @ExceptionHandler( MethodArgumentNotValidException.class)
+    public ResponseEntity RsEventExceptionHandler(Exception e){
+        String errorMessage="invalid user";
+        Error error=new Error();
+        error.setError(errorMessage);
+        return ResponseEntity.badRequest().body(error);
     }
 }
