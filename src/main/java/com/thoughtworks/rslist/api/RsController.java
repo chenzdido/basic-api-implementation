@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 public class RsController {
@@ -27,38 +28,26 @@ public class RsController {
   @Autowired
   UserRepository userRepository;
 
-  UserList u=new UserList();
-  List<User> userList=u.getUserList();
-  private List<RsEvent> rsList = initRsEventList();
-  private List<RsEvent> initRsEventList(){
-    List<RsEvent> rsEventList = new ArrayList<>();
-    User user=new User("chenz", "female", 18, "c@z.com", "18824326722");
-    userList.add(user);
-    rsEventList.add(new RsEvent("第一条事件","无标签",1));
-    rsEventList.add(new RsEvent("第二条事件","无标签",1));
-    rsEventList.add(new RsEvent("第三条事件","无标签",1));
-    return rsEventList;
-  }
-
-
 
   @GetMapping("/rs/{index}")
   public ResponseEntity getRsEvent(@PathVariable int index){
-    if(index<1||index>rsList.size()){
+    List<RsEvent> rsEvents = rsEventRepositpry.findAll().stream().map(item -> RsEvent.builder().eventName(item.getEventName()).keyWord(item.getKeyWord()).userId(item.getId()).build()).collect(Collectors.toList());
+    if (index < 1 || index > rsEvents.size()) {
       throw new RsEventNotValueException("invalid index");
     }
-    return ResponseEntity.ok(rsList.get(index-1));
+    return ResponseEntity.ok(rsEvents.get(index - 1));
   }
 
   @GetMapping("/rs/list")
   public ResponseEntity getRsEventBetween(@RequestParam(required=false) Integer start, @RequestParam(required=false) Integer end) {
-    if(start<1||end>rsList.size()){
+    List<RsEvent> rsEvents = rsEventRepositpry.findAll().stream().map(item -> RsEvent.builder().eventName(item.getEventName()).keyWord(item.getKeyWord()).userId(item.getId()).build()).collect(Collectors.toList());
+    /*if(start<1||end>rsEvents.size()){
       throw new RsEventNotValueException("invalid request param");
+    }*/
+    if (start == null || end == null) {
+      return ResponseEntity.ok(rsEvents);
     }
-    if (start!=null&&end!=null) {
-      return ResponseEntity.ok(rsList.subList(start - 1, end));
-    }
-    return ResponseEntity.ok(rsList);
+    return ResponseEntity.ok(rsEvents.subList(start - 1, end));
 
   }
 
@@ -76,20 +65,9 @@ public class RsController {
   }
 
   @DeleteMapping("/rs/delete/{index}")
-  public ResponseEntity deletRsEvent(@PathVariable int index){
-    rsList.remove(index-1);
-    return ResponseEntity.ok(null);
-  }
-
-  @PatchMapping("rs/change/{index}")
-  public ResponseEntity changeRsEvent(@PathVariable int index, @RequestBody RsEvent rsEvent){
-    if(rsEvent.getEventName()!=null){
-      rsList.get(index-1).setEventName(rsEvent.getEventName());
-    }
-    if(rsEvent.getKeyWord()!=null){
-      rsList.get(index-1).setKeyWord(rsEvent.getKeyWord());
-    }
-    return ResponseEntity.ok(null);
+  public ResponseEntity deleteRsEvent(@PathVariable int index){
+    rsEventRepositpry.deleteById(index);
+    return ResponseEntity.ok().build();
   }
 
 
