@@ -14,6 +14,7 @@ public class RsEvent {
     //@NotNull(group=a.class)
     private String eventName;
     private String keyWord;
+    private int voteNum;
     @Valid
     private int userId;
 
@@ -40,4 +41,8 @@ public class RsEvent {
     public void setUserId(int userId) {
         this.userId = userId;
     }
+
+    public int getVoteNum() { return voteNum; }
+
+    public void setVoteNum(int voteNum) { this.voteNum = voteNum; }
 }

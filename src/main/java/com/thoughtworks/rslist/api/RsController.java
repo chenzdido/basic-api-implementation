@@ -3,12 +3,15 @@ package com.thoughtworks.rslist.api;
 import com.thoughtworks.rslist.domain.RsEvent;
 import com.thoughtworks.rslist.domain.User;
 import com.thoughtworks.rslist.domain.UserList;
+import com.thoughtworks.rslist.domain.Vote;
 import com.thoughtworks.rslist.dto.RsEventDto;
 import com.thoughtworks.rslist.dto.UserDto;
+import com.thoughtworks.rslist.dto.VoteDto;
 import com.thoughtworks.rslist.exception.Error;
 import com.thoughtworks.rslist.exception.RsEventNotValueException;
 import com.thoughtworks.rslist.repository.RsEventRepositpry;
 import com.thoughtworks.rslist.repository.UserRepository;
+import com.thoughtworks.rslist.repository.VoteRepository;
 import org.hibernate.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,11 +31,13 @@ public class RsController {
   RsEventRepositpry rsEventRepositpry;
   @Autowired
   UserRepository userRepository;
+  @Autowired
+  VoteRepository voteRepository;
 
 
   @GetMapping("/rs/{index}")
   public ResponseEntity getRsEvent(@PathVariable int index){
-    List<RsEvent> rsEvents = rsEventRepositpry.findAll().stream().map(item -> RsEvent.builder().eventName(item.getEventName()).keyWord(item.getKeyWord()).userId(item.getId()).build()).collect(Collectors.toList());
+    List<RsEvent> rsEvents = rsEventRepositpry.findAll().stream().map(item -> RsEvent.builder().eventName(item.getEventName()).keyWord(item.getKeyWord()).userId(item.getId()).voteNum(item.getVoteNum()).build()).collect(Collectors.toList());
     if (index < 1 || index > rsEvents.size()) {
       throw new RsEventNotValueException("invalid index");
     }
@@ -41,7 +46,7 @@ public class RsController {
 
   @GetMapping("/rs/list")
   public ResponseEntity getRsEventBetween(@RequestParam(required=false) Integer start, @RequestParam(required=false) Integer end) {
-    List<RsEvent> rsEvents = rsEventRepositpry.findAll().stream().map(item -> RsEvent.builder().eventName(item.getEventName()).keyWord(item.getKeyWord()).userId(item.getId()).build()).collect(Collectors.toList());
+    List<RsEvent> rsEvents = rsEventRepositpry.findAll().stream().map(item -> RsEvent.builder().eventName(item.getEventName()).keyWord(item.getKeyWord()).userId(item.getId()).voteNum(item.getVoteNum()).build()).collect(Collectors.toList());
     /*if(start<1||end>rsEvents.size()){
       throw new RsEventNotValueException("invalid request param");
     }*/
@@ -85,6 +90,22 @@ public class RsController {
     }
     rsEventRepositpry.save(newrsEventDto);
     return ResponseEntity.ok(null);
+  }
+
+  @PostMapping("/rs/vote/{index}")
+  public ResponseEntity vote(@PathVariable int index, @RequestBody Vote vote) {
+    RsEventDto newrsEventDto=rsEventRepositpry.findById(index).get();
+    UserDto userDto=userRepository.findById(vote.getUserId()).get();
+    if(userDto.getVoteNum()<vote.getVoteNum()){
+      return ResponseEntity.badRequest().build();
+    }
+    VoteDto voteDto=VoteDto.builder().localDateTime(vote.getTime()).num(vote.getVoteNum()).rsEventDto(newrsEventDto).userDto(userDto).build();
+    voteRepository.save(voteDto);
+    userDto.setVoteNum(userDto.getVoteNum()-vote.getVoteNum());
+    userRepository.save(userDto);
+    newrsEventDto.setVoteNum(newrsEventDto.getVoteNum()+vote.getVoteNum());
+    rsEventRepositpry.save(newrsEventDto);
+    return ResponseEntity.ok().build();
   }
 
 }

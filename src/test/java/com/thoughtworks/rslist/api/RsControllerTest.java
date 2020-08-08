@@ -1,12 +1,16 @@
 package com.thoughtworks.rslist.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.rslist.domain.RsEvent;
 import com.thoughtworks.rslist.domain.User;
+import com.thoughtworks.rslist.domain.Vote;
 import com.thoughtworks.rslist.dto.RsEventDto;
 import com.thoughtworks.rslist.dto.UserDto;
+import com.thoughtworks.rslist.dto.VoteDto;
 import com.thoughtworks.rslist.repository.RsEventRepositpry;
 import com.thoughtworks.rslist.repository.UserRepository;
+import com.thoughtworks.rslist.repository.VoteRepository;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -14,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
@@ -33,6 +38,8 @@ class RsControllerTest {
     UserRepository userRepository;
     @Autowired
     RsEventRepositpry rsEventRepositpry;
+    @Autowired
+    VoteRepository voteRepository;
     UserDto userDto;
     RsEventDto rsEventDto;
 
@@ -41,10 +48,10 @@ class RsControllerTest {
         rsEventRepositpry.deleteAll();
         userRepository.deleteAll();
         userDto=userRepository.save(UserDto.builder().email("c@zz.com").phone("18888888999").gender("female")
-                .age(19).userName("cc").build());
-        RsEventDto rsEventDto = RsEventDto.builder().keyWord("无标签").eventName("第一条事件").userDto(userDto).build();
+                .age(19).userName("cc").voteNum(10).build());
+        RsEventDto rsEventDto = RsEventDto.builder().keyWord("无标签").eventName("第一条事件").userDto(userDto).voteNum(0).build();
         rsEventRepositpry.save(rsEventDto);
-        rsEventDto = RsEventDto.builder().keyWord("无标签").eventName("第二条事件").userDto(userDto).build();
+        rsEventDto = RsEventDto.builder().keyWord("无标签").eventName("第二条事件").userDto(userDto).voteNum(0).build();
         rsEventRepositpry.save(rsEventDto);
 
     }
@@ -63,7 +70,9 @@ class RsControllerTest {
 
     @Test
     public void should_get_rs_event() throws Exception {
-        mockMvc.perform(get("/rs/1")).andExpect(jsonPath("$.eventName", is("第一条事件")))
+        mockMvc.perform(get("/rs/1"))
+                .andExpect(jsonPath("$.eventName", is("第一条事件")))
+                .andExpect(jsonPath("$.keyWord",is("无标签")))
                 .andExpect(jsonPath("$.keyWord",is("无标签")))
                 .andExpect(status().isOk());
         mockMvc.perform(get("/rs/2")).andExpect(jsonPath("$.eventName", is("第二条事件")))
@@ -99,7 +108,7 @@ class RsControllerTest {
 
     @Test
     public void should_add_rs_event_user_exit() throws Exception {
-        RsEvent rsEvent=new RsEvent("猪肉涨价了","经济",1);
+        RsEvent rsEvent=new RsEvent("猪肉涨价了","经济",0,1);
         String jsonString=new ObjectMapper().writeValueAsString(rsEvent);
         mockMvc.perform(post("/rs/event").content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
@@ -134,7 +143,7 @@ class RsControllerTest {
 
     @Test
     public void should_change_rs_event() throws Exception {
-        RsEvent rsEvent=new RsEvent("猪肉涨价了","经济",1);
+        RsEvent rsEvent=new RsEvent("猪肉涨价了","经济",0,1);
         String jsonString=new ObjectMapper().writeValueAsString(rsEvent);
         mockMvc.perform(patch("/rs/change/1").content(jsonString).contentType(MediaType.APPLICATION_JSON));
         mockMvc.perform(get("/rs/list"))
@@ -148,8 +157,8 @@ class RsControllerTest {
     }
 
     @Test
-    public void should_change_one_rs_event() throws Exception {
-        RsEvent rsEvent=new RsEvent("猪肉涨价了",null,1);
+    public void should_change_rs_event_without_keyword() throws Exception {
+        RsEvent rsEvent=new RsEvent("猪肉涨价了",null,0,1);
         String jsonString=new ObjectMapper().writeValueAsString(rsEvent);
         mockMvc.perform(patch("/rs/change/2").content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -161,6 +170,22 @@ class RsControllerTest {
                 .andExpect(jsonPath("$[1].keyWord",is("无标签")))
                 .andExpect(status().isOk());
 
+    }
+
+    @Test
+    public void should_vote_when_user_vote_num_enough() throws Exception {
+        String jsonValue = String.format("{\"userId\":%d,\"time\":\"%s\",\"voteNum\":1}", 1, LocalDateTime.now().toString());
+        mockMvc.perform(post("/rs/vote/1").content(jsonValue).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/rs/1"))
+                .andExpect(jsonPath("$.eventName",is("第一条事件")))
+                .andExpect(jsonPath("$.keyWord",is("无标签")))
+                .andExpect(jsonPath("$.voteNum",is(1)))
+                .andExpect(status().isOk());
+        List<VoteDto> voteDtos =  voteRepository.findAll();
+        assertEquals(voteDtos.size(), 1);
+        assertEquals(voteDtos.get(0).getNum(), 1);
+        assertEquals(userRepository.findById(1).get().getVoteNum(), 9);
     }
     /*@Test
     public void should_throw_index_exception() throws Exception {
