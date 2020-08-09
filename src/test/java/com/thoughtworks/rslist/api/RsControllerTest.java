@@ -56,7 +56,7 @@ class RsControllerTest {
 
     @Test
     public void should_get_rs_event_list() throws Exception {
-        mockMvc.perform(get("/rs/list"))
+        mockMvc.perform(get("/rs"))
                 .andExpect(jsonPath("$",hasSize(2)))
                 .andExpect(jsonPath("$[0].eventName",is("第一条事件")))
                 .andExpect(jsonPath("$[0].keyWord",is("无标签")))
@@ -143,7 +143,7 @@ class RsControllerTest {
         RsEvent rsEvent=new RsEvent("猪肉涨价了","经济",0,1);
         String jsonString=new ObjectMapper().writeValueAsString(rsEvent);
         mockMvc.perform(patch("/rs/change/1").content(jsonString).contentType(MediaType.APPLICATION_JSON));
-        mockMvc.perform(get("/rs/list"))
+        mockMvc.perform(get("/rs"))
                 .andExpect(jsonPath("$",hasSize(2)))
                 .andExpect(jsonPath("$[0].eventName",is("猪肉涨价了")))
                 .andExpect(jsonPath("$[0].keyWord",is("经济")))
@@ -159,7 +159,7 @@ class RsControllerTest {
         String jsonString=new ObjectMapper().writeValueAsString(rsEvent);
         mockMvc.perform(patch("/rs/change/2").content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
-        mockMvc.perform(get("/rs/list"))
+        mockMvc.perform(get("/rs"))
                 .andExpect(jsonPath("$",hasSize(2)))
                 .andExpect(jsonPath("$[0].eventName",is("第一条事件")))
                 .andExpect(jsonPath("$[0].keyWord",is("无标签")))
