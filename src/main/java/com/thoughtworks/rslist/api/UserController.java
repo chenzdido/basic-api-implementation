@@ -43,13 +43,7 @@ public class UserController {
 
     @PostMapping("/user/event")
     public ResponseEntity register(@RequestBody @Valid User user){
-        UserDto userDto=new UserDto();
-        userDto.setPhone(user.getPhone());
-        userDto.setVoteNum(user.getVoteNum());
-        userDto.setAge(user.getAge());
-        userDto.setEmail(user.getEmail());
-        userDto.setGender(user.getGender());
-        userDto.setUserName(user.getUserName());
+        UserDto userDto=UserDto.builder().voteNum(user.getVoteNum()).phone(user.getPhone()).gender(user.getGender()).email(user.getEmail()).age(user.getAge()).userName(user.getUserName()).build();
         userRepository.save(userDto);
         return ResponseEntity.created(null).header("userId",userDto.getId()+"").build();
     }

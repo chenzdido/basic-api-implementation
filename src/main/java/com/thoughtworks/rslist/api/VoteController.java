@@ -3,6 +3,8 @@ package com.thoughtworks.rslist.api;
 import com.thoughtworks.rslist.domain.Vote;
 import com.thoughtworks.rslist.dto.VoteDto;
 import com.thoughtworks.rslist.repository.VoteRepository;
+import com.thoughtworks.rslist.service.RsService;
+import com.thoughtworks.rslist.service.VoteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,16 +20,14 @@ import java.util.stream.Collectors;
 @RestController
 public class VoteController {
     @Autowired VoteRepository voteRepository;
+    @Autowired
+    VoteService voteService;
 
     @GetMapping("/voteRecord")
     public ResponseEntity<List<Vote>> getVoteRecord(
             @RequestParam int userId, @RequestParam int rsEventId, @RequestParam int pageIndex) {
-        Pageable pageable = PageRequest.of(pageIndex - 1, 5);
-        return ResponseEntity.ok(
-                voteRepository.findAllByUserIdAndRsEventId(userId, rsEventId,pageable).stream().map(
-                                item -> Vote.builder().voteNum(item.getNum()).userId(item.getUser().getId())
-                                        .time(item.getLocalDateTime()).rsEventId(item.getRsEvent().getId()).build())
-                                .collect(Collectors.toList()));
+
+        return ResponseEntity.ok(voteService.getVoteRecord(userId,rsEventId,pageIndex));
     }
     /*@GetMapping("/voteRecordByTime")
     public ResponseEntity<List<Vote>> getVoteRecordByTime(@RequestParam LocalDateTime start,@RequestParam LocalDateTime end) {
